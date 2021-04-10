@@ -1,6 +1,7 @@
 package com.example.taskplanner
 
 import android.content.Context
+import androidx.lifecycle.LiveData
 import androidx.room.Room
 import com.example.taskplanner.database.TaskDatabase
 import java.lang.IllegalStateException
@@ -18,9 +19,9 @@ class TaskRepository private constructor(context: Context) {
 
     private val taskDao = database.taskDao()
 
-    fun getTasks(): List<Task> = taskDao.getTasks()
+    fun getTasks(): LiveData<List<Task>> = taskDao.getTasks()
 
-    fun getCrime(id: UUID): Task? = taskDao.getTask(id)
+    fun getCrime(id: UUID): LiveData<Task?> = taskDao.getTask(id)
 
     companion object {
 

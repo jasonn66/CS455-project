@@ -4,19 +4,19 @@ import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.view.ContextMenu
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.util.*
+
+private const val TAG = "DailyTasksFragment"
 
 @Suppress("DEPRECATION")
 class DailyTasksFragment: Fragment() {
@@ -29,7 +29,7 @@ class DailyTasksFragment: Fragment() {
     private var callbacks: Callbacks? = null
 
     private lateinit var dailyTasksRecyclerView: RecyclerView
-    private var adapter: TaskAdapter? = null
+    private var adapter: TaskAdapter? = TaskAdapter(emptyList())
 
     private val dailyTasksViewModel: DailyTasksViewModel by lazy {
 
@@ -45,7 +45,7 @@ class DailyTasksFragment: Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "Total tasks: ${dailyTasksViewModel.tasks.size}")
+        setHasOptionsMenu(true)
     }
 
     override fun onCreateView(
@@ -58,10 +58,22 @@ class DailyTasksFragment: Fragment() {
 
         dailyTasksRecyclerView = view.findViewById(R.id.daily_tasks_recycler_view) as RecyclerView
         dailyTasksRecyclerView.layoutManager = LinearLayoutManager(context)
-
-        updateUI()
+        dailyTasksRecyclerView.adapter = adapter
 
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        dailyTasksViewModel.taskListLiveData.observe(
+                viewLifecycleOwner,
+                Observer { tasks ->
+                    tasks?.let {
+                        Log.i(TAG, "Got tasks ${tasks.size}")
+                        updateUI(tasks)
+                    }
+                }
+        )
     }
 
     override fun onDetach() {
@@ -70,9 +82,25 @@ class DailyTasksFragment: Fragment() {
         callbacks = null
     }
 
-    private fun updateUI() {
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_daily_tasks, menu)
+    }
 
-        val tasks = dailyTasksViewModel.tasks
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.new_task -> {
+                val task = Task()
+                dailyTasksViewModel.addTask(task)
+                callbacks?.onTaskSelected(task.id)
+                true
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun updateUI(tasks: List<Task>) {
+
         adapter = TaskAdapter(tasks)
         dailyTasksRecyclerView.adapter = adapter
     }

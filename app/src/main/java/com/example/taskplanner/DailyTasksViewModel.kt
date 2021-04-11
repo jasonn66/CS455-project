@@ -4,14 +4,10 @@ import androidx.lifecycle.ViewModel
 
 class DailyTasksViewModel: ViewModel() {
 
-    val tasks = mutableListOf<Task>()
+    private val taskRepository = TaskRepository.get()
+    val taskListLiveData = taskRepository.getTasks()
 
-    init{
-        for( i in 0 until 100) {
-            val task = Task()
-            task.name = "Task #$i"
-            task.isCompleted = i % 2 == 0
-            tasks += task
-        }
+    fun addTask(task: Task) {
+        taskRepository.addTask(task)
     }
 }

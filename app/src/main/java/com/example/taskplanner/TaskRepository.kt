@@ -3,9 +3,11 @@ package com.example.taskplanner
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.room.Room
+import com.example.taskplanner.database.TaskDao
 import com.example.taskplanner.database.TaskDatabase
 import java.lang.IllegalStateException
 import java.util.*
+import java.util.concurrent.Executors
 
 private const val DATABASE_NAME = "task-database"
 
@@ -18,10 +20,23 @@ class TaskRepository private constructor(context: Context) {
     ).build()
 
     private val taskDao = database.taskDao()
+    private val executor = Executors.newSingleThreadExecutor()
 
     fun getTasks(): LiveData<List<Task>> = taskDao.getTasks()
 
-    fun getCrime(id: UUID): LiveData<Task?> = taskDao.getTask(id)
+    fun getTask(id: UUID): LiveData<Task?> = taskDao.getTask(id)
+
+    fun updateTask(task: Task) {
+        executor.execute {
+            taskDao.updateTask(task)
+        }
+    }
+
+    fun addTask(task: Task) {
+        executor.execute {
+            taskDao.addTask(task)
+        }
+    }
 
     companion object {
 

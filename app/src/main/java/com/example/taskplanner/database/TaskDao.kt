@@ -17,6 +17,9 @@ interface TaskDao {
     @Query("SELECT * FROM task WHERE task.id=(:id)")
     fun getTask(id:UUID): LiveData<Task?>
 
+    @Query("SELECT * FROM task WHERE task.date=(:date)")
+    fun getDailyTasks(date:Date): LiveData<List<Task>>
+
     @Update
     fun updateTask(task: Task)
 

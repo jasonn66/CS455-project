@@ -5,6 +5,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.widget.Button
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
@@ -14,12 +15,15 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.text.DateFormat
 import java.util.*
 
 private const val TAG = "DailyTasksFragment"
+private const val DIALOG_DATE = "DialogDate"
+private const val REQUEST_DATE = 0
 
 @Suppress("DEPRECATION")
-class DailyTasksFragment: Fragment() {
+class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
 
     interface Callbacks {
 
@@ -28,6 +32,8 @@ class DailyTasksFragment: Fragment() {
 
     private var callbacks: Callbacks? = null
 
+    private var displayDate = Date()
+    private lateinit var dateButton: Button
     private lateinit var dailyTasksRecyclerView: RecyclerView
     private var adapter: TaskAdapter? = TaskAdapter(emptyList())
 
@@ -46,6 +52,7 @@ class DailyTasksFragment: Fragment() {
 
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+        dailyTasksViewModel.loadTasks(displayDate)
     }
 
     override fun onCreateView(
@@ -56,9 +63,19 @@ class DailyTasksFragment: Fragment() {
 
         val view = inflater.inflate(R.layout.fragment_daily_tasks, container, false)
 
+        dateButton = view.findViewById(R.id.daily_tasks_date) as Button
         dailyTasksRecyclerView = view.findViewById(R.id.daily_tasks_recycler_view) as RecyclerView
         dailyTasksRecyclerView.layoutManager = LinearLayoutManager(context)
         dailyTasksRecyclerView.adapter = adapter
+
+        dateButton.text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(displayDate)
+
+        dateButton.setOnClickListener {
+            DatePickerFragment.newInstance(displayDate).apply {
+                setTargetFragment(this@DailyTasksFragment, REQUEST_DATE)
+                show(this@DailyTasksFragment.requireFragmentManager(), DIALOG_DATE)
+            }
+        }
 
         return view
     }
@@ -99,10 +116,17 @@ class DailyTasksFragment: Fragment() {
         }
     }
 
+    override fun onDateSelected(date: Date) {
+        displayDate = date
+        dateButton.text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(displayDate)
+        dailyTasksViewModel.loadTasks(displayDate)
+    }
+
     private fun updateUI(tasks: List<Task>) {
 
         adapter = TaskAdapter(tasks)
         dailyTasksRecyclerView.adapter = adapter
+        dateButton.text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(displayDate)
     }
 
     private inner class TaskHolder(view: View): RecyclerView.ViewHolder(view), View.OnClickListener {

@@ -13,6 +13,7 @@ import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.Observer
+import java.text.DateFormat
 import java.util.*
 
 private const val TAG = "TaskFragment"
@@ -126,8 +127,11 @@ class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
 
     private fun updateUI() {
         nameField.setText(task.name)
-        dateButton.text = task.date.toString()
-        completedCheckBox.isChecked = task.isCompleted
+        dateButton.text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(task.date)
+        completedCheckBox.apply {
+            isChecked = task.isCompleted
+            jumpDrawablesToCurrentState()
+        }
     }
 
     companion object {

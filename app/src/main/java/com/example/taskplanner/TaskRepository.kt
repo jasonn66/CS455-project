@@ -26,6 +26,8 @@ class TaskRepository private constructor(context: Context) {
 
     fun getTask(id: UUID): LiveData<Task?> = taskDao.getTask(id)
 
+    fun getDailyTasks(date: Date): LiveData<List<Task>> = taskDao.getDailyTasks(date)
+
     fun updateTask(task: Task) {
         executor.execute {
             taskDao.updateTask(task)

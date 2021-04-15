@@ -1,18 +1,20 @@
 package com.example.taskplanner
 
+import android.app.AlertDialog
+import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import java.text.DateFormat
 import java.util.*
 
@@ -24,6 +26,13 @@ private const val REQUEST_DATE = 0
 @Suppress("DEPRECATION")
 class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
 
+    interface Callbacks {
+
+        fun onTaskDeleted()
+    }
+
+    private var callbacks: Callbacks? = null
+
     private lateinit var task: Task
     private lateinit var nameField: EditText
     private lateinit var dateButton: Button
@@ -33,9 +42,16 @@ class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
         ViewModelProviders.of(this).get(TaskDetailViewModel::class.java)
     }
 
+    override fun onAttach(context: Context) {
+
+        super.onAttach(context)
+        callbacks = context as Callbacks?
+    }
+
     override fun onCreate(savedInstanceState: Bundle?)
     {
         super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
         task = Task()
         val taskId: UUID = arguments?.getSerializable(ARG_TASK_ID) as UUID
         taskDetailViewModel.loadTask(taskId)
@@ -64,6 +80,12 @@ class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
                     updateUI()
                 }
             })
+    }
+
+    override fun onDetach() {
+
+        super.onDetach()
+        callbacks = null
     }
 
     override fun onStart()
@@ -120,9 +142,37 @@ class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
         taskDetailViewModel.saveTask(task)
     }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_task, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(item.itemId == R.id.delete_task) {
+            deleteTask()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
     override fun onDateSelected(date: Date) {
         task.date = date
         updateUI()
+    }
+
+    private fun deleteTask() {
+        val builder = AlertDialog.Builder(requireContext())
+        builder.setPositiveButton("Yes") { _, _ ->
+            taskDetailViewModel.deleteTask(task)
+            Toast.makeText(
+                    requireContext(),
+                    "Successfully deleted ${task.name}",
+                    Toast.LENGTH_SHORT).show()
+            callbacks?.onTaskDeleted()
+        }
+        builder.setNegativeButton("No") {_, _ -> }
+        builder.setTitle("Delete ${task.name}?")
+        builder.setMessage("Are you sure you want to delete this task?")
+        builder.create().show()
     }
 
     private fun updateUI() {

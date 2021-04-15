@@ -7,7 +7,7 @@ import java.util.*
 
 private const val TAG = "MainActivity"
 
-class MainActivity : AppCompatActivity(), DailyTasksFragment.Callbacks {
+class MainActivity : AppCompatActivity(), DailyTasksFragment.Callbacks, TaskFragment.Callbacks {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -30,5 +30,13 @@ class MainActivity : AppCompatActivity(), DailyTasksFragment.Callbacks {
             .replace(R.id.fragment_container, fragment)
             .addToBackStack(null)
             .commit()
+    }
+
+    override fun onTaskDeleted() {
+        val fragment = DailyTasksFragment.newInstance()
+        supportFragmentManager
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .commit()
     }
 }

@@ -23,4 +23,8 @@ class TaskDetailViewModel() : ViewModel() {
     fun saveTask(task: Task) {
         taskRepository.updateTask(task)
     }
+
+    fun deleteTask(task: Task) {
+        taskRepository.deleteTask(task)
+    }
 }

@@ -40,6 +40,12 @@ class TaskRepository private constructor(context: Context) {
         }
     }
 
+    fun deleteTask(task: Task) {
+        executor.execute {
+            taskDao.deleteTask(task)
+        }
+    }
+
     companion object {
 
         private var INSTANCE: TaskRepository? = null

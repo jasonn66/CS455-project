@@ -8,8 +8,8 @@ import java.util.*
 @Dao
 interface TaskDao {
 
-    @Query("SELECT * FROM task")
-    fun getTasks(): LiveData<List<Task>>
+    @Query("SELECT * FROM task WHERE task.date >= (:date) ORDER BY task.date ASC")
+    fun getUpcomingTasks(date:Date): LiveData<List<Task>>
 
     @Query("SELECT * FROM task WHERE task.id=(:id)")
     fun getTask(id:UUID): LiveData<Task?>

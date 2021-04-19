@@ -22,11 +22,14 @@ class DatePickerFragment : DialogFragment() {
 
             val resultDate : Date = GregorianCalendar(year, month, day).time
 
-            targetFragment?.let {fragment ->  
+            //targetFragment stores the fragment instance that started the DatePickerFragment
+            targetFragment?.let {fragment ->
+                //passes the selected date to the fragment
                 (fragment as Callbacks).onDateSelected(resultDate)
             }
         }
 
+        // initializes DatePickerDialog with the date passed from another fragment
         val date = arguments?.getSerializable(ARG_DATE) as Date
         val calendar = Calendar.getInstance()
         calendar.time = date

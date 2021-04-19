@@ -52,6 +52,7 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
 
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
+        displayDate = zeroDateTime(displayDate)
         dailyTasksViewModel.loadTasks(displayDate)
     }
 
@@ -100,6 +101,7 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId==R.id.new_task) {
             val task = Task()
+            task.date = zeroDateTime(task.date)
             dailyTasksViewModel.addTask(task)
             callbacks?.onTaskSelected(task.id)
         }
@@ -117,6 +119,17 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
         displayDate = date
         dateTextView.text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(displayDate)
         dailyTasksViewModel.loadTasks(displayDate)
+    }
+
+    private fun zeroDateTime(date: Date) : Date {
+
+        val calendar = Calendar.getInstance()
+        calendar.time = date
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH)
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+        return (GregorianCalendar(year, month, day).time)
     }
 
     private fun updateUI(tasks: List<Task>) {

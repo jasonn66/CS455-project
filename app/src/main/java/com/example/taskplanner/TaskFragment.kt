@@ -129,6 +129,7 @@ class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
             }
         }
 
+        // displays the DatePickerFragment when clicked
         dateButton.setOnClickListener {
             DatePickerFragment.newInstance(task.date).apply {
                 setTargetFragment(this@TaskFragment, REQUEST_DATE)

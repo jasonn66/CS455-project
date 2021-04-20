@@ -5,6 +5,8 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
+import android.view.View.GONE
+import android.view.View.VISIBLE
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.TextView
@@ -15,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.w3c.dom.Text
 import java.text.DateFormat
 import java.util.*
 
@@ -35,6 +38,8 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
     private var displayDate = Date()
     private lateinit var dateTextView: TextView
     private lateinit var dailyTasksRecyclerView: RecyclerView
+    private lateinit var noTasksTextView: TextView
+    private lateinit var addTaskButton: Button
     private var adapter: TaskAdapter? = TaskAdapter(emptyList())
 
     private val dailyTasksViewModel: DailyTasksViewModel by lazy {
@@ -68,6 +73,8 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
         dailyTasksRecyclerView = view.findViewById(R.id.daily_tasks_recycler_view) as RecyclerView
         dailyTasksRecyclerView.layoutManager = LinearLayoutManager(context)
         dailyTasksRecyclerView.adapter = adapter
+        noTasksTextView = view.findViewById(R.id.no_tasks) as TextView
+        addTaskButton = view.findViewById(R.id.add_task) as Button
 
         dateTextView.text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(displayDate)
 
@@ -93,6 +100,14 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
         callbacks = null
     }
 
+    override fun onStart() {
+        super.onStart()
+
+        addTaskButton.setOnClickListener {
+            addTask()
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.fragment_daily_tasks, menu)
@@ -100,10 +115,7 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId==R.id.new_task) {
-            val task = Task()
-            task.date = zeroDateTime(task.date)
-            dailyTasksViewModel.addTask(task)
-            callbacks?.onTaskSelected(task.id)
+            addTask()
         }
         else if(item.itemId==R.id.select_date) {
             DatePickerFragment.newInstance(displayDate).apply {
@@ -121,6 +133,13 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
         dailyTasksViewModel.loadTasks(displayDate)
     }
 
+    private fun addTask() {
+        val task = Task()
+        task.date = zeroDateTime(task.date)
+        dailyTasksViewModel.addTask(task)
+        callbacks?.onTaskSelected(task.id)
+    }
+
     private fun zeroDateTime(date: Date) : Date {
 
         val calendar = Calendar.getInstance()
@@ -134,6 +153,14 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
 
     private fun updateUI(tasks: List<Task>) {
 
+        if(tasks.isEmpty()) {
+            noTasksTextView.visibility = VISIBLE
+            addTaskButton.visibility = VISIBLE
+        }
+        else {
+            noTasksTextView.visibility = GONE
+            addTaskButton.visibility = GONE
+        }
         adapter = TaskAdapter(tasks)
         dailyTasksRecyclerView.adapter = adapter
         dateTextView.text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(displayDate)

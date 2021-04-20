@@ -1,5 +1,6 @@
 package com.example.taskplanner
 
+import android.annotation.SuppressLint
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.os.Bundle
@@ -20,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import org.w3c.dom.Text
 import java.text.DateFormat
 import java.util.*
+import kotlin.math.abs
 
 private const val TAG = "DailyTasksFragment"
 private const val DIALOG_DATE = "DialogDate"
@@ -75,6 +77,8 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
         dailyTasksRecyclerView.adapter = adapter
         noTasksTextView = view.findViewById(R.id.no_tasks) as TextView
         addTaskButton = view.findViewById(R.id.add_task) as Button
+
+        view.setOnTouchListener(OnSwipeTouchListener())
 
         dateTextView.text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(displayDate)
 
@@ -206,6 +210,75 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
         override fun onBindViewHolder(holder: TaskHolder, position: Int) {
             val task = tasks[position]
             holder.bind(task)
+        }
+    }
+
+    private inner class OnSwipeTouchListener : View.OnTouchListener {
+
+        private var gestureDetector: GestureDetector
+
+        init {
+            gestureDetector = GestureDetector(context, GestureListener())
+        }
+
+        fun onSwipeLeft() {
+            val calendar = Calendar.getInstance()
+            calendar.time = displayDate
+            calendar.add(Calendar.DAY_OF_MONTH, 1)
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+            displayDate = GregorianCalendar(year, month, day).time
+
+            dailyTasksViewModel.loadTasks(displayDate)
+        }
+
+        fun onSwipeRight() {
+            val calendar = Calendar.getInstance()
+            calendar.time = displayDate
+            calendar.add(Calendar.DAY_OF_MONTH, -1)
+            val year = calendar.get(Calendar.YEAR)
+            val month = calendar.get(Calendar.MONTH)
+            val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+            displayDate = GregorianCalendar(year, month, day).time
+
+            dailyTasksViewModel.loadTasks(displayDate)
+        }
+
+        override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+            return gestureDetector.onTouchEvent(event)
+        }
+
+        private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
+
+            private val swipeDistanceThreshold = 100
+            private val swipeVelocityThreshold = 100
+
+            override fun onDown(e: MotionEvent?): Boolean {
+                return true
+            }
+
+            override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
+                val distanceX = e2.x - e1.x
+                val distanceY = e2.y - e1.y
+
+                if(abs(distanceX) > abs(distanceY) &&
+                        abs(distanceX) > swipeDistanceThreshold &&
+                        abs(velocityX) > swipeVelocityThreshold) {
+                    if(distanceX > 0) {
+                        onSwipeRight()
+                    }
+                    else {
+                        onSwipeLeft()
+                    }
+
+                    return true
+                }
+
+                return false
+            }
         }
     }
 

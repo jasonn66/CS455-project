@@ -20,6 +20,10 @@ class DailyTasksViewModel: ViewModel() {
         taskDateLiveData.value = date
     }
 
+    fun saveTask(task: Task) {
+        taskRepository.updateTask(task)
+    }
+
     fun addTask(task: Task) {
         taskRepository.addTask(task)
     }

@@ -35,6 +35,7 @@ class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
 
     private lateinit var task: Task
     private lateinit var nameField: EditText
+    private lateinit var notesField: EditText
     private lateinit var dateButton: Button
     private lateinit var completedCheckBox: CheckBox
 
@@ -64,6 +65,7 @@ class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
     {
         val view = inflater.inflate(R.layout.fragment_task, container, false)
         nameField = view.findViewById(R.id.task_name) as EditText
+        notesField = view.findViewById(R.id.task_notes) as EditText
         dateButton = view.findViewById(R.id.task_date) as Button
         completedCheckBox = view.findViewById(R.id.task_completed) as CheckBox
 
@@ -121,7 +123,38 @@ class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
             }
         }
 
+        val notesWatcher = object : TextWatcher
+        {
+
+            override fun beforeTextChanged(
+                    sequence: CharSequence?,
+                    start: Int,
+                    count: Int,
+                    after: Int
+            )
+            {
+                // This space intentionally left blank
+            }
+
+            override fun onTextChanged(
+                    sequence: CharSequence?,
+                    start: Int,
+                    before: Int,
+                    count: Int
+            )
+            {
+                task.note = sequence.toString()
+            }
+
+            override fun afterTextChanged(sequence: Editable?)
+            {
+                // This one too
+            }
+        }
+
         nameField.addTextChangedListener(nameWatcher)
+
+        notesField.addTextChangedListener(notesWatcher)
 
         completedCheckBox.apply {
             setOnCheckedChangeListener {_, isChecked ->
@@ -178,6 +211,7 @@ class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
 
     private fun updateUI() {
         nameField.setText(task.name)
+        notesField.setText(task.note)
         dateButton.text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(task.date)
         completedCheckBox.apply {
             isChecked = task.isCompleted

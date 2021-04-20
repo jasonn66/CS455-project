@@ -24,6 +24,12 @@
         android:layout_height="wrap_content"
         android:text="@string/task_notes_label"/>
 
+    <EditText
+        android:id="@+id/task_notes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/task_notes_hint"/>
+
     <Button
         android:id="@+id/task_date"
         android:layout_width="match_parent"

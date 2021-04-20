@@ -154,6 +154,12 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
             this.task = task
             nameTextView.text = this.task.name
             isCompletedCheckBox.isChecked = this.task.isCompleted
+
+            // listener for the checkbox that updates the isCompleted property of the task in the database
+            isCompletedCheckBox.setOnCheckedChangeListener { _, isChecked ->
+                this.task.isCompleted = isChecked
+                dailyTasksViewModel.saveTask(this.task)
+            }
         }
 
         override fun onClick(v: View) {

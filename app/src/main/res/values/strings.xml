@@ -2,6 +2,7 @@
     <string name="app_name">Task Planner</string>
     <string name="task_name_hint">Enter a name for the task.</string>
     <string name="task_name_label">Name</string>
+    <string name="task_notes_hint">Enter any notes about the task.</string>
     <string name="task_notes_label">Notes</string>
     <string name="task_completed_label">Completed</string>
     <string name="new_task">New Task</string>

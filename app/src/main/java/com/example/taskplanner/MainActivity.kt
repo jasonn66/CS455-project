@@ -14,6 +14,7 @@ class MainActivity : AppCompatActivity(), DailyTasksFragment.Callbacks, TaskFrag
 
         val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
 
+        // Shows the DailyTasksFragment as the main screen
         if (currentFragment == null) {
             val fragment = DailyTasksFragment.newInstance()
             supportFragmentManager
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity(), DailyTasksFragment.Callbacks, TaskFrag
         }
     }
 
+    // Navigates to the TaskFragment when a task is selected
     override fun onTaskSelected(taskId: UUID) {
         val fragment = TaskFragment.newInstance(taskId)
         supportFragmentManager
@@ -32,6 +34,7 @@ class MainActivity : AppCompatActivity(), DailyTasksFragment.Callbacks, TaskFrag
             .commit()
     }
 
+    // Navigates to the DailyTasksFragment when a task is deleted
     override fun onTaskDeleted() {
         val fragment = DailyTasksFragment.newInstance()
         supportFragmentManager

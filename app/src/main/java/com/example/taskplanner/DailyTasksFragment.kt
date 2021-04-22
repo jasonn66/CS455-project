@@ -59,7 +59,7 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
 
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
-        displayDate = zeroDateTime(displayDate)
+        displayDate = setDateTimeMidnight(displayDate)
         dailyTasksViewModel.loadTasks(displayDate)
     }
 
@@ -87,6 +87,8 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Observes any changes to the list of tasks and updates the UI
         dailyTasksViewModel.taskListLiveData.observe(
                 viewLifecycleOwner,
                 Observer { tasks ->
@@ -122,6 +124,7 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
             addTask()
         }
         else if(item.itemId==R.id.select_date) {
+            // Displays the DatePicker when the select date menu item is selected
             DatePickerFragment.newInstance(displayDate).apply {
                 setTargetFragment(this@DailyTasksFragment, REQUEST_DATE)
                 show(this@DailyTasksFragment.requireFragmentManager(), DIALOG_DATE)
@@ -131,20 +134,23 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
         return super.onOptionsItemSelected(item)
     }
 
+    // Receives the selected date from the DatePicker and loads tasks for the new date
     override fun onDateSelected(date: Date) {
         displayDate = date
         dateTextView.text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(displayDate)
         dailyTasksViewModel.loadTasks(displayDate)
     }
 
+    // Adds a new blank Task to the database and views the blank task in the Task Fragment
     private fun addTask() {
         val task = Task()
-        task.date = zeroDateTime(task.date)
+        task.date = setDateTimeMidnight(task.date)
         dailyTasksViewModel.addTask(task)
         callbacks?.onTaskSelected(task.id)
     }
 
-    private fun zeroDateTime(date: Date) : Date {
+    // Sets the time value in the given date to midnight
+    private fun setDateTimeMidnight(date: Date) : Date {
 
         val calendar = Calendar.getInstance()
         calendar.time = date
@@ -157,6 +163,7 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
 
     private fun updateUI(tasks: List<Task>) {
 
+        // If there are no tasks in the RecyclerView, display TextView and Button, otherwise hide them
         if(tasks.isEmpty()) {
             noTasksTextView.visibility = VISIBLE
             addTaskButton.visibility = VISIBLE
@@ -170,6 +177,7 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
         dateTextView.text = DateFormat.getDateInstance(DateFormat.MEDIUM).format(displayDate)
     }
 
+    // Wraps Item View for the RecyclerView
     private inner class TaskHolder(view: View): RecyclerView.ViewHolder(view), View.OnClickListener {
 
         private lateinit var task: Task
@@ -181,12 +189,13 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
             itemView.setOnClickListener(this)
         }
 
+        // Binds data from the model layer
         fun bind(task: Task) {
             this.task = task
             nameTextView.text = this.task.name
             isCompletedCheckBox.isChecked = this.task.isCompleted
 
-            // listener for the checkbox that updates the isCompleted property of the task in the database
+            // Listener for the checkbox that updates the value in the database
             isCompletedCheckBox.setOnCheckedChangeListener { _, isChecked ->
                 this.task.isCompleted = isChecked
                 dailyTasksViewModel.saveTask(this.task)
@@ -198,6 +207,7 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
         }
     }
 
+    // Creates TaskHolders when asked and binds TaskHolders to data from the model layer
     private inner class TaskAdapter(var tasks: List<Task>) : RecyclerView.Adapter<TaskHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskHolder {
@@ -213,6 +223,7 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
         }
     }
 
+    // OnSwipeTouchListener changes the display date when the user swipes left or right
     private inner class OnSwipeTouchListener : View.OnTouchListener {
 
         private var gestureDetector: GestureDetector
@@ -222,6 +233,7 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
         }
 
         fun onSwipeLeft() {
+            // Increment the display date
             val calendar = Calendar.getInstance()
             calendar.time = displayDate
             calendar.add(Calendar.DAY_OF_MONTH, 1)
@@ -235,6 +247,7 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
         }
 
         fun onSwipeRight() {
+            // Decrement the display date
             val calendar = Calendar.getInstance()
             calendar.time = displayDate
             calendar.add(Calendar.DAY_OF_MONTH, -1)
@@ -251,6 +264,7 @@ class DailyTasksFragment: Fragment(), DatePickerFragment.Callbacks {
             return gestureDetector.onTouchEvent(event)
         }
 
+        // GestureListener detects when the user swipes left or right
         private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
 
             private val swipeDistanceThreshold = 100

@@ -74,6 +74,8 @@ class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        // Observes any changes to task and updates the UI
         taskDetailViewModel.taskLiveData.observe(
             viewLifecycleOwner,
             Observer { task ->
@@ -94,6 +96,7 @@ class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
     {
         super.onStart()
 
+        // TextWatcher for the task name
         val nameWatcher = object : TextWatcher
         {
 
@@ -123,6 +126,7 @@ class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
             }
         }
 
+        // TextWatcher for the task notes
         val notesWatcher = object : TextWatcher
         {
 
@@ -162,7 +166,7 @@ class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
             }
         }
 
-        // displays the DatePickerFragment when clicked
+        // Displays the DatePickerFragment when clicked
         dateButton.setOnClickListener {
             DatePickerFragment.newInstance(task.date).apply {
                 setTargetFragment(this@TaskFragment, REQUEST_DATE)
@@ -188,15 +192,19 @@ class TaskFragment : Fragment(), DatePickerFragment.Callbacks {
         return super.onOptionsItemSelected(item)
     }
 
+    // Receives the selected date from the DatePicker and updates the task date
     override fun onDateSelected(date: Date) {
         task.date = date
         updateUI()
     }
 
+    // Dialog that confirms if the user wants to delete the task or not
     private fun deleteTask() {
         val builder = AlertDialog.Builder(requireContext())
+        // If the user selects yes, then the task will be deleted from the database
         builder.setPositiveButton("Yes") { _, _ ->
             taskDetailViewModel.deleteTask(task)
+            // Toast shows that the task was deleted
             Toast.makeText(
                     requireContext(),
                     "Successfully deleted ${task.name}",

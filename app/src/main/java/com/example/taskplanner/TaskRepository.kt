@@ -11,8 +11,10 @@ import java.util.concurrent.Executors
 
 private const val DATABASE_NAME = "task-database"
 
+// TaskRepository determines how to fetch and store data for the application
 class TaskRepository private constructor(context: Context) {
 
+    // Creates a concrete implementation of the abstract TaskDatabase
     private val database : TaskDatabase = Room.databaseBuilder(
             context.applicationContext,
             TaskDatabase::class.java,
@@ -20,7 +22,12 @@ class TaskRepository private constructor(context: Context) {
     ).build()
 
     private val taskDao = database.taskDao()
+
+    // Creates a new thread to execute code on
     private val executor = Executors.newSingleThreadExecutor()
+
+
+    // Database functions
 
     fun getUpcomingTasks(date: Date): LiveData<List<Task>> = taskDao.getUpcomingTasks(date)
 

@@ -53,7 +53,8 @@ Sit back and relax when all of your tasks are completed.
 ![completed_tasks_screenshot](https://user-images.githubusercontent.com/55205345/115652278-3169db00-a2ea-11eb-8fe2-c7baa93fa833.jpg)
 
 ## Installation
-
+1. Download the project here
+2. Open and run the project in Android Studio
 
 ## Bug List
 _Currently empty.. contact me if you find any 🐞_
